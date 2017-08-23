@@ -21,12 +21,15 @@ func (n *NSQD) Stats() (*Stats, error) {
 	url := fmt.Sprintf("http://%s/stats?format=json", n.Address)
 
 	req, err := http.Get(url)
+
 	if err != nil {
 		return nil, err
 	}
+
 	defer req.Body.Close()
 
-	var s *stats
+	var s Stats
 	err = json.NewDecoder(req.Body).Decode(&s)
-	return s.Data, err
+
+	return &s, err
 }

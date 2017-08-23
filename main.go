@@ -1,14 +1,15 @@
 package main
 
-import "github.com/dustin/go-humanize"
-import "github.com/tj/nsqtop/pkg/nsqd"
-import "github.com/segmentio/go-log"
-import "github.com/tj/go-gracefully"
-import "github.com/tj/docopt"
-import stdlog "log"
-import "io/ioutil"
-import "time"
-import "fmt"
+import (
+	"fmt"
+	"log"
+	"time"
+
+	"github.com/dustin/go-humanize"
+	"github.com/tj/docopt"
+	"github.com/tj/go-gracefully"
+	"github.com/wjh/nsqtop/pkg/nsqd"
+)
 
 var Version = "0.1.0"
 
@@ -27,15 +28,21 @@ const Usage = `
 `
 
 func main() {
-	stdlog.SetOutput(ioutil.Discard)
-
 	args, err := docopt.Parse(Usage, nil, true, Version, false)
-	log.Check(err)
+
+	if err != nil {
+		log.Fatal(err)
+		return
+	}
 
 	addrs := args["--nsqd-http-address"].([]string)
 
 	d, err := time.ParseDuration(args["--interval"].(string))
-	log.Check(err)
+
+	if err != nil {
+		log.Fatal(err)
+		return
+	}
 
 	go loop(d, addrs)
 
@@ -48,11 +55,16 @@ func loop(d time.Duration, addrs []string) {
 			nsq := nsqd.New(addr)
 
 			stats, err := nsq.Stats()
-			log.Check(err)
+
+			if err != nil {
+				log.Fatal(err)
+				return
+			}
 
 			fmt.Printf("\033[2J\033[0f")
 			fmt.Printf("\n\n\n\033[1m%30s\033[0m\n", addr)
 			fmt.Printf("%30s %30s %15s %15s %15s %15s\n", "topic", "channel", "depth", "in-flight", "deferred", "timeouts")
+
 			for _, topic := range stats.Topics {
 				fmt.Printf("%30s %30s %15s %15s %15s %15s\n",
 					topic.Name,

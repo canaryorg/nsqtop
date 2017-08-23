@@ -1,10 +1,5 @@
 package nsqd
 
-// stats with envelope.
-type stats struct {
-	Data *Stats
-}
-
 // Stats.
 type Stats struct {
 	Version string   `json:"version"`
